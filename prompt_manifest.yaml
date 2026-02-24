@@ -1,0 +1,33 @@
+# This manifest maps analysis tasks to specific prompts and Salesforce metadata.
+# It is the single source of truth for the analyzer's capabilities.
+
+analysis_tasks:
+  - id: APEX_HARDCODED_IDS
+    name: "Apex Hardcoded ID Check"
+    area: "Best Practices"
+    description: "Scans Apex classes and triggers for hardcoded 15 or 18-character Salesforce IDs."
+    
+    # Points to the specific prompt file to use for this analysis.
+    prompt_file: "prompts/apex/best_practices_hardcoded_ids.prompt"
+    
+    # Tells the orchestrator which types of metadata files this analysis applies to.
+    target_metadata_types:
+      - "ApexClass"
+      - "ApexTrigger"
+      
+    # Defines the exact JSON structure the LLM must return. This is crucial for reliability.
+    expected_output_schema:
+      type: "object"
+      properties:
+        contains_hardcoded_id: { type: "boolean" }
+        line_numbers: { type: "array", items: { type: "integer" } }
+        explanation: { type: "string" }
+        recommendation: { type: "string" }
+      required: ["contains_hardcoded_id"]
+
+# You can add more tasks here later. For example:
+#
+#  - id: LWC_IMPERATIVE_APEX
+#    name: "LWC Imperative Apex Performance Check"
+#    area: "Performance"
+#    ...
