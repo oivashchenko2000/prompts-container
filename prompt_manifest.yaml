@@ -1,21 +1,12 @@
-# This manifest maps analysis tasks to specific prompts and Salesforce metadata.
-# It is the single source of truth for the analyzer's capabilities.
+# This manifest is the "brain" of the Salesforce Analyzer.
+# It defines parallel code analysis tasks and sequential synthesis tasks.
 
 analysis_tasks:
   - id: APEX_HARDCODED_IDS
     name: "Apex Hardcoded ID Check"
-    area: "Best Practices"
-    description: "Scans Apex classes and triggers for hardcoded 15 or 18-character Salesforce IDs."
-    
-    # Points to the specific prompt file to use for this analysis.
+    description: "Scans for hardcoded 15 or 18-character Salesforce IDs."
     prompt_file: "prompts/apex/best_practices_hardcoded_ids.prompt"
-    
-    # Tells the orchestrator which types of metadata files this analysis applies to.
-    target_metadata_types:
-      - "ApexClass"
-      - "ApexTrigger"
-      
-    # Defines the exact JSON structure the LLM must return. This is crucial for reliability.
+    target_metadata_types: ["ApexClass", "ApexTrigger"]
     expected_output_schema:
       type: "object"
       properties:
@@ -25,9 +16,35 @@ analysis_tasks:
         recommendation: { type: "string" }
       required: ["contains_hardcoded_id"]
 
-# You can add more tasks here later. For example:
-#
-#  - id: LWC_IMPERATIVE_APEX
-#    name: "LWC Imperative Apex Performance Check"
-#    area: "Performance"
-#    ...
+  - id: APEX_SOQL_IN_LOOP
+    name: "Apex SOQL/DML in Loop Check"
+    description: "Detects SOQL queries or DML statements inside loops."
+    prompt_file: "prompts/apex/performance_soql_in_loop.prompt"
+    target_metadata_types: ["ApexClass", "ApexTrigger"]
+    expected_output_schema:
+      type: "object"
+      properties:
+        has_soql_or_dml_in_loop: { type: "boolean" }
+        violation_details: { type: "array", items: { "type": "object", "properties": { "line_number": { "type": "integer" }, "statement": { "type": "string" }, "loop_type": { "type": "string" }}}}
+        recommendation: { type: "string" }
+      required: ["has_soql_or_dml_in_loop"]
+
+  - id: LWC_IMPERATIVE_APEX
+    name: "LWC Imperative Apex Call Check"
+    description: "Identifies LWCs that use imperative Apex calls."
+    prompt_file: "prompts/lwc/best_practices_imperative_apex.prompt"
+    target_metadata_types: ["LightningComponentBundle"]
+    expected_output_schema:
+      type: "object"
+      properties:
+        uses_imperative_apex: { type: "boolean" }
+        imported_methods: { type: "array", items: { "type": "string" } }
+        recommendation: { type: "string" }
+      required: ["uses_imperative_apex"]
+
+synthesis_tasks:
+  - id: FINAL_REPORT_SYNTHESIS
+    name: "Final Report Generation"
+    description: "Takes all findings and synthesizes a complete Markdown report."
+    prompt_file: "prompts/synthesis/final_report_synthesis.prompt"
+    # This task doesn't have an output schema because its output is a raw string (Markdown)
