@@ -7,7 +7,7 @@ Analyze custom LWC components retrieved into the local workspace and produce arc
 Do not replicate generic lint output. Focus on higher-order architecture, coupling, and implementation difficulty signals.
 
 Inputs (local workspace)
-Assume metadata was retrieved to the repo workspace. Use VS Code context controls to target LWC folders/files.
+Assume metadata was retrieved to the repo workspace.
 
 Default folder targets (use if present)
 force-app/main/default/lwc

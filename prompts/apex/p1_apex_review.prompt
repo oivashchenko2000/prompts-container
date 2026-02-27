@@ -7,7 +7,7 @@ Analyze custom Apex classes and triggers retrieved into the local workspace and 
 Do not replicate generic static analysis (e.g., “missing sharing keywords”, obvious lint). Focus on higher-order architecture and implementation difficulty signals.
 
 Inputs (local workspace)
-Assume metadata was retrieved to the repo workspace. Use VS Code context controls to target Apex folders/files.
+Assume metadata was retrieved to the repo workspace.
 
 Default folder targets (use if present)
 force-app/main/default/classes
