@@ -1,4 +1,8 @@
-prompts:
+# This manifest orchestrates a multi-stage analysis.
+# It defines parallel code analysis tasks and sequential synthesis tasks.
+
+# This key MUST be named 'analysis_tasks' to match the orchestrator code.
+analysis_tasks:
   - id: APEX_REVIEW
     name: "Apex Architecture Review"
     prompt_file: "prompts/apex/p1_apex_review.prompt"
@@ -8,15 +12,33 @@ prompts:
     name: "LWC Architecture Review"
     prompt_file: "prompts/lwc/p2_lwc_review.prompt"
     metadata_types: ["LightningComponentBundle"]
-    
+
+# This key MUST be named 'synthesis_tasks' to match the orchestrator code.
+synthesis_tasks:
   - id: ARCHITECTURE_PATTERNS
     name: "Architecture Patterns and Anti-patterns Synthesis"
     prompt_file: "prompts/synthesis/p5_architecture_patterns.prompt"
+    # This task needs to produce structured JSON for the next step, so it needs a schema.
+    expected_output_schema:
+      type: "object"
+      properties:
+        patterns_observed: { type: "array", items: { "type": "string" }}
+        anti_patterns_observed: { type: "array", items: { "type": "string" }}
+        architecture_gaps: { type: "array", items: { "type": "string" }}
+      required: ["patterns_observed", "anti_patterns_observed"]
 
   - id: BUSINESS_PROCESS_VISION
     name: "High-Level Business Process Vision Synthesis"
     prompt_file: "prompts/synthesis/p6_business_process_vision.prompt"
-    
+    # This also needs a schema if its output is to be used programmatically later.
+    expected_output_schema:
+      type: "object"
+      properties:
+        process_catalog: { type: "array", items: { "type": "object" }}
+        current_vision_narratives: { type: "array", items: { "type": "string" }}
+      required: ["process_catalog"]
+
   - id: FINAL_REPORT_ASSEMBLY
     name: "Final Report Assembly"
     prompt_file: "prompts/synthesis/p7_final_report_assembly.prompt"
+    # This final task produces raw Markdown, so it does NOT need an expected_output_schema.
