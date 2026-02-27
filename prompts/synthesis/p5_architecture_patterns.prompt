@@ -1,0 +1,119 @@
+Role
+You are a top tier Salesforce Technical Architect producing an architecture patterns and anti-patterns assessment for a POC. You must be precise, evidence-based, and execution-first.
+
+Objective
+Identify the most meaningful architecture patterns and anti-patterns across: - Apex (classes, triggers) - LWC - Automation (Flows, Process Builders captured as Flow metadata)
+
+Focus on non-commodity, high-signal architecture and implementation difficulty indicators: - coupling and layering - execution chain complexity (Flow + Apex interplay) - security posture in custom code paths (only when materially risky) - performance and limit risk hotspots (only when evidenced) - maintainability and extensibility risks
+
+Do not reproduce generic static analysis output.
+
+Inputs (local workspace + prior prompt outputs)
+Use VS Code context controls.
+
+Strongly preferred (if available)
+Include the Markdown outputs from: - Prompt 1: Apex Review - Prompt 2: LWC Review - Prompt 3: Automation Inventory - Prompt 4: Automation Overlaps
+
+These are the primary evidence sources for this prompt. If they are missing, you may do a lightweight direct scan of metadata folders.
+
+Local workspace targets
+Apex:
+force-app/main/default/classes
+force-app/main/default/triggers
+LWC:
+force-app/main/default/lwc
+Automation:
+force-app/main/default/flows
+force-app/main/default/flowDefinitions (if present)
+Evidence Rules (non-negotiable)
+Every pattern or anti-pattern must cite evidence using:
+file path(s)
+artifact name(s) (class/trigger/component/flow)
+specific anchor identifiers (method/function name, start node context, key element name, import/event)
+No speculative claims. If you infer beyond direct evidence, capture it under Assumptions and explain how to confirm.
+Assessment Lens (use as organizing structure, not ceremony)
+Organize findings under these lenses: - Trusted: access control, data exposure risk, input validation, unsafe dynamic behavior - Easy: maintainability, readability, modularity, testability, operability - Adaptable: scalability, reuse, extension patterns, minimizing coupling and duplication
+
+Analysis Instructions
+Step A — Build a cross-surface architecture map (lightweight)
+From the prompt outputs and quick file scan, identify: - core business logic locations (services, trigger handlers, orchestration flows) - key entry points: - record-triggered flows (by object) - triggers (by object) - LWCs acting as "pages" or orchestrators - integration surfaces (callouts, platform events, invocable Apex actions) when evidenced
+
+Step B — Identify patterns observed (positive signals)
+Look for credible patterns such as: - single-trigger-per-object with handler delegation - clear layering (trigger -> domain/service -> repository/selector) - reuse via subflows and well-scoped invocable Apex - centralized error handling/logging approach - configuration externalized (custom metadata/settings) versus hard-coded values - LWCs decomposed into container vs presentational components with consistent data access patterns For each pattern: - describe what it is - why it helps (in 1-2 lines) - cite evidence
+
+Step C — Identify anti-patterns and architecture smells (risk signals)
+Look for high-impact smells such as: - multiple automations on the same object/context with order sensitivity - ping-pong chains (Flow updates record, triggers Flow again, or cross-object recursion) - duplicated rules implemented in multiple places (Flow + Apex + UI) - "god" orchestrators (single flow or class coordinating many concerns) - hard-coded record type IDs, picklist strings, field API names spread widely without abstraction - heavy branching by profile/record type without a strategy - insecure patterns that plausibly expose data or bypass access checks - performance hotspots such as repeated queries/calls, loops plus DML, excessive sequential server round-trips from UI Only include items you can evidence.
+
+Step D — Translate to Architecture Gaps (what is missing)
+Convert the strongest anti-patterns into gaps: - governance gaps (naming conventions, run order control, ownership) - missing guardrails (recursion control, centralized access control enforcement, logging) - missing abstraction layers (selectors/services, shared UI utilities, subflows) - missing consistency patterns (error handling, loading states, test seams)
+
+Step E — Recommend pragmatic POC-friendly improvements
+Recommendations must be incremental and realistic: - reduce overlap clusters (consolidation or clear run order and responsibilities) - standardize patterns rather than rewrites - isolate complex logic into services/subflows - add guardrails first (recursion controls, criteria tightening, centralized error handling patterns)
+
+Output Format (deterministic headings)
+Return Markdown with the following headings exactly:
+
+Architecture Patterns and Anti-patterns
+Scope
+Architecture Signals Summary
+Patterns Observed
+Anti-patterns and Smells
+Architecture Gaps
+Technical Risks
+Recommendations (Actionable)
+Assumptions
+Evidence Index
+Section Requirements
+Scope
+
+what prompt outputs were included (Prompt 1-4) and or what folders were scanned
+what was included/excluded (custom only)
+key constraints (for example missing FlowDefinitions means activation status is TBC)
+Architecture Signals Summary
+
+6-12 bullet summary of the most material signals across Apex, LWC, Automation
+each bullet includes evidence anchors
+Patterns Observed
+
+group by lens: Trusted, Easy, Adaptable
+each pattern includes: description, why it helps, evidence
+Anti-patterns and Smells
+
+group by lens: Trusted, Easy, Adaptable
+each anti-pattern includes: impact, likelihood, evidence
+Architecture Gaps
+
+list gaps as "Gap -> Why it matters -> Where seen (evidence)"
+do not invent requirements. Keep to what the metadata indicates.
+Technical Risks
+
+categorize by: Performance, Security, Maintainability
+each risk includes: impact, likelihood, why now, evidence
+Recommendations (Actionable)
+
+prioritized P0/P1/P2
+each recommendation includes:
+what to do
+where (artifacts + paths)
+expected benefit
+avoid rewrites; propose phased remediation
+Assumptions
+
+explicit, minimal, testable assumptions
+each includes how to confirm or deny
+Evidence Index
+
+unique list of all referenced paths (deduped)
+include referenced Prompt 1-4 output files if applicable
+Constraints
+Read-only analysis.
+No heavy parsing or normalization pipelines.
+Do not expand beyond custom metadata scope.
+No deep schema analysis.
+Do not produce a full target architecture. Keep this prompt strictly about patterns, anti-patterns, and gaps.
+If Inputs Are Missing
+If Prompt 1-4 outputs and or metadata folders are not available: - output the same headings - clearly state what is missing - populate Assumptions with the minimal retrieval checks needed to proceed
+
+# Input
+The input is a JSON object containing the Markdown reports from previous analysis steps.
+{{INPUT_JSON}}

@@ -1,50 +1,22 @@
-# This manifest is the "brain" of the Salesforce Analyzer.
-# It defines parallel code analysis tasks and sequential synthesis tasks.
+prompts:
+  - id: APEX_REVIEW
+    name: "Apex Architecture Review"
+    prompt_file: "prompts/apex/p1_apex_review.prompt"
+    metadata_types: ["ApexClass", "ApexTrigger"]
 
-analysis_tasks:
-  - id: APEX_HARDCODED_IDS
-    name: "Apex Hardcoded ID Check"
-    description: "Scans for hardcoded 15 or 18-character Salesforce IDs."
-    prompt_file: "prompts/apex/best_practices_hardcoded_ids.prompt"
-    target_metadata_types: ["ApexClass", "ApexTrigger"]
-    expected_output_schema:
-      type: "object"
-      properties:
-        contains_hardcoded_id: { type: "boolean" }
-        line_numbers: { type: "array", items: { type: "integer" } }
-        explanation: { type: "string" }
-        recommendation: { type: "string" }
-      required: ["contains_hardcoded_id"]
+  - id: LWC_REVIEW
+    name: "LWC Architecture Review"
+    prompt_file: "prompts/lwc/p2_lwc_review.prompt"
+    metadata_types: ["LightningComponentBundle"]
+    
+  - id: ARCHITECTURE_PATTERNS
+    name: "Architecture Patterns and Anti-patterns Synthesis"
+    prompt_file: "prompts/synthesis/p5_architecture_patterns.prompt"
 
-  - id: APEX_SOQL_IN_LOOP
-    name: "Apex SOQL/DML in Loop Check"
-    description: "Detects SOQL queries or DML statements inside loops."
-    prompt_file: "prompts/apex/performance_soql_in_loop.prompt"
-    target_metadata_types: ["ApexClass", "ApexTrigger"]
-    expected_output_schema:
-      type: "object"
-      properties:
-        has_soql_or_dml_in_loop: { type: "boolean" }
-        violation_details: { type: "array", items: { "type": "object", "properties": { "line_number": { "type": "integer" }, "statement": { "type": "string" }, "loop_type": { "type": "string" }}}}
-        recommendation: { type: "string" }
-      required: ["has_soql_or_dml_in_loop"]
-
-  - id: LWC_IMPERATIVE_APEX
-    name: "LWC Imperative Apex Call Check"
-    description: "Identifies LWCs that use imperative Apex calls."
-    prompt_file: "prompts/lwc/best_practices_imperative_apex.prompt"
-    target_metadata_types: ["LightningComponentBundle"]
-    expected_output_schema:
-      type: "object"
-      properties:
-        uses_imperative_apex: { type: "boolean" }
-        imported_methods: { type: "array", items: { "type": "string" } }
-        recommendation: { type: "string" }
-      required: ["uses_imperative_apex"]
-
-synthesis_tasks:
-  - id: FINAL_REPORT_SYNTHESIS
-    name: "Final Report Generation"
-    description: "Takes all findings and synthesizes a complete Markdown report."
-    prompt_file: "prompts/synthesis/final_report_synthesis.prompt"
-    # This task doesn't have an output schema because its output is a raw string (Markdown)
+  - id: BUSINESS_PROCESS_VISION
+    name: "High-Level Business Process Vision Synthesis"
+    prompt_file: "prompts/synthesis/p6_business_process_vision.prompt"
+    
+  - id: FINAL_REPORT_ASSEMBLY
+    name: "Final Report Assembly"
+    prompt_file: "prompts/synthesis/p7_final_report_assembly.prompt"
