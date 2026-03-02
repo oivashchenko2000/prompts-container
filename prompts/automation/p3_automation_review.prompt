@@ -95,5 +95,6 @@ If Inputs Are Missing
 If you cannot find Flow files: - Output the same headings. - State "No Flow metadata found" in Scope and Inventory Summary. - List assumptions about retrieval paths. - Provide minimal next retrieval check recommendations.
 
 # Input
-The input is a JSON object containing the Markdown reports from previous analysis steps.
+The input is a JSON object where keys are metadata file paths and values are file contents.
+Treat this as the source-of-truth corpus for Flow/FlowDefinition inventory and analysis.
 {{INPUT_JSON}}

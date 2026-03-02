@@ -8,15 +8,14 @@ Transform the provided JSON object, which contains both low-level findings and h
 You will be given a JSON input. Follow these steps to construct the report:
 
 1.  **Title and Scope:** Start with a main title "Salesforce Architecture POC Report" and a "Scope Notes" section summarizing what was analyzed.
-2.  **Architecture Gaps:** If the input contains a key named `ARCHITECTURE_PATTERNS_SYNTHESIS_result`, use its `architecture_gaps` array to create a bulleted list under a heading "Architecture Gaps".
+2.  **Architecture Gaps:** If the input contains a key named `ARCHITECTURE_PATTERNS_result`, use its `architecture_gaps` array to create a bulleted list under a heading "Architecture Gaps".
 3.  **Technical Risks:** Create a "Technical Risks" section. Synthesize the most critical risks identified in both `detailed_findings` and the `anti_patterns_observed` section of the architecture summary. Group them by Performance, Security, and Maintainability.
 4.  **High-Level Vision:** Create a "High-Level Architecture Vision" section with two sub-headings:
     -   **Current State:** Summarize the current architecture based on the `patterns_observed` and `anti_patterns_observed`.
     -   **Recommended State:** Provide high-level recommendations based on the identified gaps and risks.
 5.  **Business Process Vision:** If the input contains a key named `BUSINESS_PROCESS_VISION_result`, format its content under a "High-Level Business Process Vision (Inferred)" section.
-6.  **Detailed Findings Appendix:** Create an appendix section titled "Appendix: Detailed Findings". Group all items from the `detailed_findings` array by their "analysisTaskName". For each group, list the findings for each file.
+6.  **Detailed Findings Appendix:** Create an appendix section titled "Appendix: Detailed Findings". Group all items from the `detailed_findings` array by their `task_name` (fallback to `task_id` when missing). For each group, include the `metadata_types` and summarize key signals from the `result` text.
 
 # Input
 Analyze the JSON object of findings provided below.
-```json
 {{INPUT_JSON}}
