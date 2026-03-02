@@ -108,7 +108,7 @@ jobs:
             echo "✅ Analysis complete!"
             echo "=================================================="
             echo "Your report is ready."
-            echo "Download URL (valid for 1 hour): $REPORT_URL"
+            echo "Download URL: $REPORT_URL"
             echo "=================================================="
           else
             ERROR_MESSAGE=$(jq -r .output status_response.json)
