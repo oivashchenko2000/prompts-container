@@ -1,0 +1,104 @@
+# .github/workflows/run-analyzer.yml
+
+name: Run Salesforce Org Analyzer
+
+on:
+  workflow_dispatch:
+    inputs:
+      salesforce_username:
+        description: 'Salesforce Username'
+        required: true
+        type: string
+      salesforce_password_with_token:
+        description: 'Salesforce Password + Security Token (paste directly)'
+        required: true
+        type: string
+
+jobs:
+  run-analysis:
+    runs-on: ubuntu-latest
+    name: Trigger and Monitor SFDX Analysis
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install jq
+        run: sudo apt-get install -y jq
+
+      - name: 1. Start Analysis and Get Job ID
+        id: start_job
+        run: |
+          echo "Sending request to start analysis..."
+          # Make the initial POST request and save the response to a file
+          curl --request POST \
+            --url "${{ secrets.APIM_ENDPOINT_URL }}" \
+            --header 'Content-Type: application/json' \
+            --header 'Ocp-Apim-Subscription-Key: ${{ secrets.APIM_SUBSCRIPTION_KEY }}' \
+            --data @- \
+            --fail --show-error --silent \
+            <<EOF > response.json
+          {
+            "salesforce_creds": {
+              "username": "${{ github.event.inputs.salesforce_username }}",
+              "password": "${{ github.event.inputs.salesforce_password_with_token }}"
+            }
+          }
+          EOF
+
+          # Check if the curl command was successful and the response file was created
+          if [ ! -s response.json ]; then
+            echo "::error::Failed to start analysis job. The initial POST request failed or returned an empty response."
+            exit 1
+          fi
+
+          # Parse the status URI from the response and set it as an output for the next step
+          STATUS_URI=$(jq -r .statusQueryGetUri response.json)
+          echo "Job started successfully. Polling status at: $STATUS_URI"
+          echo "status_uri=$STATUS_URI" >> $GITHUB_OUTPUT
+
+      - name: 2. Poll for Job Completion
+        id: poll_job
+        run: |
+          STATUS_URI="${{ steps.start_job.outputs.status_uri }}"
+          COUNTER=0
+          MAX_RETRIES=60 # 60 retries * 30 seconds = 30 minutes timeout
+
+          while [ $COUNTER -lt $MAX_RETRIES ]; do
+            # Make the GET request to the status URL
+            curl -s "$STATUS_URI" > status_response.json
+            
+            RUNTIME_STATUS=$(jq -r .runtimeStatus status_response.json)
+            echo "Polling... Current status: $RUNTIME_STATUS"
+
+            if [ "$RUNTIME_STATUS" == "Completed" ] || [ "$RUNTIME_STATUS" == "Failed" ] || [ "$RUNTIME_STATUS" == "Terminated" ]; then
+              echo "Job has finished with status: $RUNTIME_STATUS"
+              break
+            fi
+
+            COUNTER=$((COUNTER+1))
+            sleep 30
+          done
+
+          if [ $COUNTER -ge $MAX_RETRIES ]; then
+            echo "::error::Job timed out after 30 minutes."
+            exit 1
+          fi
+
+      - name: 3. Process Final Result
+        run: |
+          FINAL_STATUS=$(jq -r .runtimeStatus status_response.json)
+
+          if [ "$FINAL_STATUS" == "Completed" ]; then
+            REPORT_URL=$(jq -r .output.report_url status_response.json)
+            echo "✅ Analysis complete!"
+            echo "=================================================="
+            echo "Your report is ready."
+            echo "Download URL (valid for 1 hour): $REPORT_URL"
+            echo "=================================================="
+          else
+            ERROR_MESSAGE=$(jq -r .output status_response.json)
+            echo "::error::Analysis failed with status: $FINAL_STATUS"
+            echo "Reason: $ERROR_MESSAGE"
+            exit 1
+          fi
