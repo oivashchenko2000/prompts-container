@@ -1,7 +1,3 @@
-# This manifest orchestrates a multi-stage analysis.
-# It defines parallel code analysis tasks and sequential synthesis tasks.
-
-# This key MUST be named 'analysis_tasks' to match the orchestrator code.
 analysis_tasks:
   - id: APEX_REVIEW
     name: "Apex Architecture Review"
@@ -18,16 +14,14 @@ analysis_tasks:
     prompt_file: "prompts/automation/p3_automation_review.prompt"
     metadata_types: ["Flow", "FlowDefinition"]
 
-# This key MUST be named 'synthesis_tasks' to match the orchestrator code.
 synthesis_tasks:
   - id: AUTOMATION_OVERLAPS
     name: "Automation Overlaps Analysis"
-    prompt_file: "prompts/automation/p4_automation_overlaps.prompt"
+    prompt_file: "prompts/synthesis/p4_automation_overlaps.prompt"
 
   - id: ARCHITECTURE_PATTERNS
     name: "Architecture Patterns and Anti-patterns Synthesis"
     prompt_file: "prompts/synthesis/p5_architecture_patterns.prompt"
-    # This task needs to produce structured JSON for the next step, so it needs a schema.
     expected_output_schema:
       type: "object"
       properties:
@@ -39,7 +33,6 @@ synthesis_tasks:
   - id: BUSINESS_PROCESS_VISION
     name: "High-Level Business Process Vision Synthesis"
     prompt_file: "prompts/synthesis/p6_business_process_vision.prompt"
-    # This also needs a schema if its output is to be used programmatically later.
     expected_output_schema:
       type: "object"
       properties:
@@ -50,4 +43,3 @@ synthesis_tasks:
   - id: FINAL_REPORT_ASSEMBLY
     name: "Final Report Assembly"
     prompt_file: "prompts/synthesis/p7_final_report_assembly.prompt"
-    # This final task produces raw Markdown, so it does NOT need an expected_output_schema.
