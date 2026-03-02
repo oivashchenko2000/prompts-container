@@ -10,7 +10,7 @@ on:
         description: 'Salesforce Username (pre-authorized for the Connected App)'
         required: true
         type: string
-        salesforce_password:
+      salesforce_password:
         description: 'Salesforce Password (pre-authorized for the Connected App)'
         required: true
         type: string
