@@ -13,8 +13,17 @@ analysis_tasks:
     prompt_file: "prompts/lwc/p2_lwc_review.prompt"
     metadata_types: ["LightningComponentBundle"]
 
+  - id: AUTOMATION_REVIEW
+    name: "Flow Architecture Review"
+    prompt_file: "prompts/automation/p3_automation_review.prompt"
+    metadata_types: ["Flow", "FlowDefinition"]
+
 # This key MUST be named 'synthesis_tasks' to match the orchestrator code.
 synthesis_tasks:
+  - id: AUTOMATION_OVERLAPS
+    name: "Automation Overlaps Analysis"
+    prompt_file: "prompts/automation/p4_automation_overlaps.prompt"
+
   - id: ARCHITECTURE_PATTERNS
     name: "Architecture Patterns and Anti-patterns Synthesis"
     prompt_file: "prompts/synthesis/p5_architecture_patterns.prompt"
