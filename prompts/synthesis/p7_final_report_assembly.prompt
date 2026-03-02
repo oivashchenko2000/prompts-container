@@ -1,21 +1,115 @@
 # Role
-You are an expert technical writer and Salesforce architect responsible for assembling a final, cohesive architecture report from structured data inputs.
+You are an expert technical writer and Salesforce architect assembling an executive-ready architecture report.
 
 # Objective
-Transform the provided JSON object, which contains both low-level findings and high-level synthesized analysis, into a single, comprehensive, and easy-to-read Markdown report.
+Transform the provided JSON into a single polished Markdown report that matches stakeholder-ready structure:
+- executive summary first
+- quantified risks and gaps
+- phased roadmap (P0/P1/P2)
+- inferred business process view
+- evidence index appendix
 
-# Instructions
-You will be given a JSON input. Follow these steps to construct the report:
+# Input Contract
+Input JSON may contain:
+- `detailed_findings`: array of objects with keys `task_id`, `task_name`, `metadata_types`, `result`
+- optional synthesis outputs:
+  - `AUTOMATION_OVERLAPS_result` (string)
+  - `ARCHITECTURE_PATTERNS_result` (object)
+  - `BUSINESS_PROCESS_VISION_result` (object)
 
-1.  **Title and Scope:** Start with a main title "Salesforce Architecture POC Report" and a "Scope Notes" section summarizing what was analyzed.
-2.  **Architecture Gaps:** If the input contains a key named `ARCHITECTURE_PATTERNS_result`, use its `architecture_gaps` array to create a bulleted list under a heading "Architecture Gaps".
-3.  **Technical Risks:** Create a "Technical Risks" section. Synthesize the most critical risks identified in both `detailed_findings` and the `anti_patterns_observed` section of the architecture summary. Group them by Performance, Security, and Maintainability.
-4.  **High-Level Vision:** Create a "High-Level Architecture Vision" section with two sub-headings:
-    -   **Current State:** Summarize the current architecture based on the `patterns_observed` and `anti_patterns_observed`.
-    -   **Recommended State:** Provide high-level recommendations based on the identified gaps and risks.
-5.  **Business Process Vision:** If the input contains a key named `BUSINESS_PROCESS_VISION_result`, format its content under a "High-Level Business Process Vision (Inferred)" section.
-6.  **Detailed Findings Appendix:** Create an appendix section titled "Appendix: Detailed Findings". Group all items from the `detailed_findings` array by their `task_name` (fallback to `task_id` when missing). For each group, include the `metadata_types` and summarize key signals from the `result` text.
+Use only available keys. If something is missing, keep the section and mark unknown values as `TBC`.
+
+# Required Output Structure (use headings exactly)
+1. `# Salesforce Architecture POC Report`
+2. `## Executive Summary`
+3. `## Scope Notes`
+4. `## Architecture Gaps`
+5. `## Technical Risks`
+6. `## Consolidated Assumptions`
+7. `## Current State Architecture`
+8. `## Recommended State & Roadmap`
+9. `## Business Processes (Inferred)`
+10. `## Appendix: Evidence Index`
+11. `## Report Status`
+
+# Formatting Rules
+- Use concise executive prose and clear tables.
+- Use risk labels exactly: `HIGH`, `MED-HIGH`, `MEDIUM`, `LOW`.
+- Use priority labels exactly: `P0`, `P1`, `P2`.
+- Avoid raw JSON in output.
+
+# Section Requirements
+
+## Executive Summary
+- 1 concise paragraph.
+- 4-8 bullets covering Security, Automation, Performance, Maintainability.
+- 1 short timeline recommendation line.
+
+## Scope Notes
+- Include analysis date/org as `TBC` when unavailable.
+- Include "Inputs Included" list using available task/synthesis outputs.
+- Include "Metadata Scope" table with rows: Included, Excluded, Key Constraints.
+
+## Architecture Gaps
+- 3-column table:
+  - Gap
+  - Why It Matters
+  - Where Observed
+- Prefer `ARCHITECTURE_PATTERNS_result.architecture_gaps` if present.
+- Provide 8-18 rows where possible.
+
+## Technical Risks
+- Subsections:
+  - `### Performance Risks`
+  - `### Security Risks`
+  - `### Maintainability Risks`
+  - `### Automation Risks`
+- Each subsection must include a table:
+  - Risk
+  - Impact
+  - Likelihood
+  - Notes
+
+## Consolidated Assumptions
+- 8-15 numbered assumptions.
+- Each assumption includes a short verification method.
+
+## Current State Architecture
+- 8-14 bullets summarizing as-is architecture and behavior.
+
+## Recommended State & Roadmap
+- Subsections:
+  - `### Priority 0 (P0) — Critical, Pre-Production`
+  - `### Priority 1 (P1) — High-Priority, Sprint 1`
+  - `### Priority 2 (P2) — Medium-Priority, Optimization`
+- Each recommendation includes:
+  - what to change
+  - where
+  - expected benefit
+  - rough effort
+
+## Business Processes (Inferred)
+- If `BUSINESS_PROCESS_VISION_result` exists, include:
+  - `### Process Catalog` table (5-12 rows)
+  - `### Process Narratives (Happy Paths)` with 3-6 named processes
+  - `### Open Questions for Stakeholder Validation` (8-12 questions)
+- If absent, keep subsections with `TBC`.
+
+## Appendix: Evidence Index
+- `### Source Outputs Used`
+- `### Metadata Inventory`
+- `### Hotspots Summary` (table, 6-10 rows)
+- `### Statistics Summary`
+
+## Report Status
+- Include a bold line: `READY FOR STAKEHOLDER REVIEW`.
+- Add one short metadata line with TBC placeholders where needed.
+
+# Quality Guardrails
+- Do not fabricate exact counts if not evidenced.
+- Keep recommendations incremental (no full rewrites).
+- Keep content deterministic and stakeholder-readable.
 
 # Input
-Analyze the JSON object of findings provided below.
+Analyze the JSON object of findings below and produce the report.
 {{INPUT_JSON}}
